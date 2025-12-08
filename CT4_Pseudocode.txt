@@ -1,0 +1,157 @@
+/* 
+ A calculator that evaluates postfix expressions.
+ This class allows for a text file of expressions to be evaluated and
+ printed to the console.
+*/
+
+CLASS PostfixCalculator
+    // Stack that is used to store operands during evaluation and final result
+    DECLARE PRIVATE Stack OF Integer stack
+    
+    // Constructs a new calculator with an empty stack
+    CONSTRUCTOR PostfixCalculator     
+        THIS.stack = NEW Stack OF Integer
+    END CONSTRUCTOR
+
+    /*
+     Evaluates a postfix expression and returns the result.
+     Only works for addition (+), subtraction (-), multiplication (*),
+     division (/), and modulus (%).
+    */
+    METHOD int evaluatePostfix(String postfixExpression)
+        DECLARE int operand1
+        DECLARE int operand2
+
+        // StringBuilder to store each digit for multi-digit operands
+        DECLARE StringBuilder number = NEW StringBuilder()
+        
+        // Ensure stack is empty before evaluating expression
+        CALL stack.clear()
+
+        // Iterate through each character in expression
+        FOR each token IN CALL postfixExpression.toCharArray()
+            IF (CALL Character.isDigit(token) THEN
+                // Use StringBuilder to build multi-digit operands
+                CALL number.append(token)
+            ELSE IF (token EQUALS ' ') THEN
+                // Push the built number to stack
+                IF (CALL number.length() > 0) THEN
+                    CALL stack.push(CALL Integer.valueOf(CALL number.toString()))
+                    // Reset for next number
+                    CALL number.setLength(0)
+                END IF
+            ELSE
+                // Ensure there are two operands
+                IF (CALL stack.size() < 2) THEN
+                    THROW EXCEPTION IllegalArgumentException WITH MESSAGE "Invalid expression: Incorrect number of operands"
+                END IF
+  
+                // Assign popped values to temporary operand variables
+                operand2 = CALL stack.pop()
+                operand1 = CALL stack.pop()
+
+                // Determine which operation to perform on operands
+                SWITCH (token)
+                    CASE '+':
+                        CALL stack.push(operand1 + operand2)
+                    CASE '-':
+                        CALL stack.push(operand1 - operand2)
+                    CASE '*':
+                        CALL stack.push(operand1 * operand2)
+                    CASE '/':
+                        IF (operand2 EQUALS 0) THEN
+                            THROW EXCEPTION IllegalArgumentException WITH MESSAGE "Cannot divide by 0"
+                        END IF
+                        CALL stack.push(operand1 / operand2)
+                    CASE '%':
+                        CALL stack.push(operand1 % operand2)
+                    DEFAULT:
+                        // Exception for incorrect type of operator
+                        THROW EXCEPTION IllegalArgumentException WITH MESSAGE "Invalid expression: Incorrect operator"
+                END SWITCH
+            END IF
+        END FOR
+
+        // Ensure there is no missing operator at the end as signified by remaining digits in StringBuilder object
+        IF (CALL number.length() > 0) THEN
+            THROW EXCEPTION IllegalArgumentException WITH MESSAGE "Invalid expression: missing an operator"
+        END IF
+   
+        // Ensure the result is stored in stack
+        IF (CALL stack.size() NOT EQUALS 1) THEN
+            THROW EXCEPTION IllegalArgumentException WITH MESSAGE "Invalid expression: Unable to evaluate"
+        END IF
+
+        RETURN CALL stack.pop()
+    END METHOD
+
+    /*
+     Reads postfix expressions from a file and prints results to console.
+     If postfix expression in file is invalid, it will print exceptions to screen.
+    */
+    METHOD evaluateFromFile(String filename)
+        // Temporary string variable to hold expression on each line
+        DECLARE String expression
+      
+        TRY
+            DECLARE FILE file = NEW File(filename)
+            DECLARE SCANNER scnr = NEW Scanner(file)
+
+            // Read each line of the file and evaluate its expression
+            WHILE (CALL scnr.hasNextLine())
+                // Store expression to temporary variable
+                expression = CALL scnr.nextLine()
+
+                TRY
+                    // Call on evaluatePostfix() and store result to variable
+                    DECLARE int result = CALL evaluatePostfix(expression)
+                    OUTPUT "File expression: " + expression + " = " + result + NEWLINE
+                CATCH IllegalArgumentException e
+                    OUTPUT "Could not evaluate '" + expression + "' due to error: " + CALL e.getMessage() + NEWLINE
+                END TRY 
+            END WHILE
+
+            CALL scnr.close()
+
+        CATCH FileNotFoundException e
+            OUTPUT "Invalid filename: " + filename + NEWLINE
+        END TRY
+    END METHOD
+
+    /*
+     Demonstrates usage of the PostfixCalculator
+     Reads expressions from a file and evaluates sample expressions directly.
+     Also tests three examples from the assignment description
+    */
+    MAIN METHOD
+        // Create PostFixCalculator object
+        DECLARE PostfixCalculator calculator = NEW PostfixCalculator()
+        
+        // Call on evaluateFromFile() evaluate expressions from text file
+        CALL calculator.evaluateFromFile("expressions.txt")
+
+        // Example 1: Valid Expression
+        TRY
+            DECLARE String expression1 = "42 2 * 3 +"
+            OUTPUT "Result 1: " + CALL calculator.evaluatePostfix(expression1) + NEWLINE
+        CATCH IllegalArgumentException e
+            OUTPUT CALL e.getMessage() + NEWLINE
+        END TRY
+
+        // Example 2: Valid Expression
+        TRY
+            DECLARE String expression2 = "5 3 + 7 *"
+            OUTPUT "Result 2: " + CALL calculator.evaluatePostfix(expression2) + NEWLINE
+        CATCH IllegalArgumentException e
+            OUTPUT CALL e.getMessage() + NEWLINE
+        END TRY
+
+        // Example 3: Invalid Expression
+        TRY
+            DECLARE String expression3 = "4 2 * 3 +"
+            OUTPUT "Result 3: " + CALL calculator.evaluatePostfix(expression3) + NEWLINE
+        CATCH IllegalArgumentException e
+            OUTPUT CALL e.getMessage() + NEWLINE
+        END TRY
+    END METHOD
+END CLASS
