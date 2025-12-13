@@ -117,41 +117,4 @@ CLASS PostfixCalculator
             OUTPUT "Invalid filename: " + filename + NEWLINE
         END TRY
     END METHOD
-
-    /*
-     Demonstrates usage of the PostfixCalculator
-     Reads expressions from a file and evaluates sample expressions directly.
-     Also tests three examples from the assignment description
-    */
-    MAIN METHOD
-        // Create PostFixCalculator object
-        DECLARE PostfixCalculator calculator = NEW PostfixCalculator()
-        
-        // Call on evaluateFromFile() evaluate expressions from text file
-        CALL calculator.evaluateFromFile("expressions.txt")
-
-        // Example 1: Valid Expression
-        TRY
-            DECLARE String expression1 = "42 2 * 3 +"
-            OUTPUT "Result 1: " + CALL calculator.evaluatePostfix(expression1) + NEWLINE
-        CATCH IllegalArgumentException e
-            OUTPUT CALL e.getMessage() + NEWLINE
-        END TRY
-
-        // Example 2: Valid Expression
-        TRY
-            DECLARE String expression2 = "5 3 + 7 *"
-            OUTPUT "Result 2: " + CALL calculator.evaluatePostfix(expression2) + NEWLINE
-        CATCH IllegalArgumentException e
-            OUTPUT CALL e.getMessage() + NEWLINE
-        END TRY
-
-        // Example 3: Invalid Expression
-        TRY
-            DECLARE String expression3 = "4 2 * 3 +"
-            OUTPUT "Result 3: " + CALL calculator.evaluatePostfix(expression3) + NEWLINE
-        CATCH IllegalArgumentException e
-            OUTPUT CALL e.getMessage() + NEWLINE
-        END TRY
-    END METHOD
 END CLASS

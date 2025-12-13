@@ -36,6 +36,16 @@ public class PostfixCalculator {
      * @throws IllegalArgumentException if the expression is invalid
 	 */
 	public int evaluatePostfix(String postfixExpression) throws IllegalArgumentException {
+		// Check if expression is null
+		if (postfixExpression == null) {
+			throw new IllegalArgumentException("Invalid expression: Null expression");
+		}
+		
+		// Check if expression is empty
+		if (postfixExpression.trim().length() == 0) {
+			throw new IllegalArgumentException("Invalid expression: Empty expression");
+		}
+		
 		int operand1;
 		int operand2;
 		
@@ -146,49 +156,5 @@ public class PostfixCalculator {
 		catch (FileNotFoundException e) {
 			System.out.println("Invalid filename: " + filename);
 		}
-	}
-	
-	/**
-     * Demonstrates usage of the PostfixCalculator.
-     * <p>
-     * Reads expressions from a file and evaluates sample expressions directly.
-     * Also tests three examples from the assignment description
-     * </p>
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
-    	// Create PostFixCalculator object
-        PostfixCalculator calculator = new PostfixCalculator();
-        
-        // Call on evaluateFromFile() evaluate expressions from text file
-        calculator.evaluateFromFile("expressions.txt");
-        
-        // Example 1: Valid Expression
-        try {
-        	String expression1 = "42 2 * 3 +";
-            System.out.println("Result 1: " + calculator.evaluatePostfix(expression1));
-        }
-        catch (IllegalArgumentException e) {
-        	System.out.println(e.getMessage());
-        }
-        
-        // Example 2: Valid Expression
-        try {
-            String expression2 = "5 3 + 7 *";
-            System.out.println("Result 2: " + calculator.evaluatePostfix(expression2));
-        }
-        catch (IllegalArgumentException e) {
-        	System.out.println(e.getMessage());
-        }
-        
-        // Example 3: Invalid Expression
-        try {
-        	String expression3 = "4 2 * +"; // Missing operand
-            System.out.println("Result 3: " + calculator.evaluatePostfix(expression3));
-        }
-        catch (IllegalArgumentException e) {
-        	System.out.println(e.getMessage());
-        }
-    }	        
+	}     
 }
